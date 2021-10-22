@@ -1,77 +1,112 @@
-import { RefObject, useCallback, useEffect, useRef } from 'react';
+import { useRef, useEffect, useCallback, RefObject } from 'react';
 
-function useResize({
-  ref,
-  velocity = 3,
-}: {
-  ref: RefObject<HTMLDivElement>;
-  velocity?: number;
-}) {
-  const pxToScrollRef = useRef<number>(velocity);
+interface IParams {
+  onDown?: () => void;
+  onResize: (position: number) => void;
+  onUp?: () => void;
+  snap?: number;
+  elementKey?: string;
+}
 
-  const isDownRef = useRef<boolean>(false);
-  const startXRef = useRef<number>(0);
-  const startYRef = useRef<number>(0);
-  const scrollTopRef = useRef<number>(0);
-  const scrollLeftRef = useRef<number>(0);
+function useResize(
+  ref: RefObject<HTMLDivElement>,
+  { snap = 1, onDown, onResize, onUp, elementKey }: IParams,
+  parentRef?: RefObject<HTMLDivElement>,
+) {
+  const isResizingRef = useRef<boolean>(false);
+
+  const xOnStart = useRef<number>(0);
+
+  const getSnapPosition = useCallback(
+    (dx: number) => dx - (dx % snap) + (dx % snap < snap / 2 ? 0 : snap),
+    [snap],
+  );
 
   const onMouseDown = useCallback(
     (e: globalThis.MouseEvent) => {
-      if (ref.current) {
-        ref.current.style.cursor = 'grabbing';
-        isDownRef.current = true;
-        startXRef.current = e.pageX - ref.current.offsetLeft;
-        startYRef.current = e.pageY - ref.current.offsetTop;
-        scrollLeftRef.current = ref.current.scrollLeft;
-        scrollTopRef.current = ref.current.scrollTop;
+      if (onDown) onDown();
+
+      if (!isResizingRef.current) {
+        isResizingRef.current = true;
+
+        if (parentRef) {
+          if (parentRef.current) {
+            const { left } = parentRef.current.getBoundingClientRect();
+
+            xOnStart.current = Number(e.pageX) - left;
+          }
+
+          return;
+        }
+
+        xOnStart.current = Number(e.pageX);
       }
     },
-    [ref],
+    [onDown, parentRef],
   );
-
-  const onMouseLeave = useCallback(() => {
-    isDownRef.current = false;
-    if (ref.current) {
-      ref.current.style.cursor = 'grab';
-    }
-  }, [ref]);
-
-  const onMouseUp = useCallback(() => {
-    isDownRef.current = false;
-    if (ref.current) {
-      ref.current.style.cursor = 'grab';
-    }
-  }, [ref]);
 
   const onMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
-      if (isDownRef.current) {
-        if (ref.current) {
-          const x = e.pageX - ref.current.offsetLeft;
-          const y = e.pageY - ref.current.offsetTop;
-          const walkX = (x - startXRef.current) * pxToScrollRef.current;
-          const walkY = (y - startYRef.current) * pxToScrollRef.current;
+      e.stopPropagation();
 
-          ref.current.scrollLeft = scrollLeftRef.current - walkX;
-          ref.current.scrollTop = scrollTopRef.current - walkY;
+      if (!isResizingRef.current) return;
+
+      if (parentRef) {
+        if (parentRef.current) {
+          const { left } = parentRef.current.getBoundingClientRect();
+
+          const dx = Number(e.pageX) - left;
+
+          let position = getSnapPosition(dx);
+
+          const foundedElement = document.getElementById(elementKey || '');
+
+          if (foundedElement) {
+            const { scrollLeft } = foundedElement;
+
+            position += getSnapPosition(scrollLeft);
+          }
+
+          onResize(position);
         }
+
+        return;
       }
 
-      e.preventDefault();
+      const dx = Number(e.pageX);
+
+      const position = getSnapPosition(dx);
+
+      onResize(position);
     },
-    [ref],
+    [elementKey, parentRef, getSnapPosition, onResize],
   );
+
+  const onMouseUp = useCallback(() => {
+    if (isResizingRef.current) {
+      isResizingRef.current = false;
+
+      xOnStart.current = 0;
+
+      if (onUp) onUp();
+    }
+  }, [onUp]);
 
   useEffect(() => {
     if (ref.current) {
-      ref.current.style.cursor = 'grab';
-
       ref.current.addEventListener('mousedown', onMouseDown);
-      ref.current.addEventListener('mouseleave', onMouseLeave);
-      ref.current.addEventListener('mouseup', onMouseUp);
-      ref.current.addEventListener('mousemove', onMouseMove);
+
+      if (parentRef) {
+        if (parentRef.current) {
+          parentRef.current.addEventListener('mousemove', onMouseMove);
+          parentRef.current.addEventListener('mouseup', onMouseUp);
+        }
+      } else {
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      }
     }
-  }, [onMouseDown, onMouseLeave, onMouseMove, onMouseUp, ref]);
+  }, [ref, parentRef, onMouseDown, onMouseMove, onMouseUp]);
 }
 
 export { useResize };
