@@ -1,18 +1,24 @@
 import React, { useMemo } from 'react';
-// import Ink from 'react-ink';
 
 import { isWeekend } from 'date-fns';
+
+import { ICalendarItem } from '@contexts/ReactTimelineContext';
 
 import { Container } from './styles';
 
 interface IDayProps {
-  date: Date;
+  item: ICalendarItem;
 }
 
-const Day: React.FC<IDayProps> = ({ date }) => {
-  const itsWeekend = useMemo(() => isWeekend(date), [date]);
+const Day: React.FC<IDayProps> = ({ item }) => {
+  const itsWeekend = useMemo(() => isWeekend(item.date), [item.date]);
 
-  return <Container itsWeekend={itsWeekend} />;
+  return (
+    <Container
+      itsWeekend={itsWeekend}
+      onClick={() => console.log('Abrindo modal', item)}
+    />
+  );
 };
 
 export { Day as TimelineDay };

@@ -1,35 +1,46 @@
 import { darken, lighten } from 'polished';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Container = styled.div`
-  /* width: 235px; */
-  min-width: 47px;
-  height: 28px;
+interface IContainerProps {
+  color: string;
+}
 
-  border-radius: 6px;
-  border: 2px solid #5ce9e2;
-  background: ${darken(0.2, '#5CE9E2')};
+export const Container = styled.div<IContainerProps>`
+  ${({ color }) => css`
+    min-width: 47px;
+    height: 28px;
 
-  position: absolute;
-  top: 23.5px;
-  transform: translateY(-14px);
+    border-radius: 6px;
+    border: 2px solid ${lighten(0.1, color)};
+    background: ${darken(0.05, color)};
 
-  cursor: pointer;
+    position: absolute;
+    top: 23.5px;
+    transform: translateY(-14px);
 
-  transition: border, background 200ms;
+    cursor: pointer;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    transition: border, background 200ms;
 
-  &:hover {
-    border: 2px solid ${lighten(0.2, '#5CE9E2')};
-    background: #5ce9e2;
-  }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &:hover {
+      border: 2px solid ${lighten(0.2, color)};
+      background: ${color};
+
+      div {
+        &::after {
+          opacity: 1;
+        }
+      }
+    }
+  `}
 `;
 
 export const Interaction = styled.div`
-  width: 12px;
+  width: 14px;
   height: 28px;
 
   position: relative;
@@ -38,12 +49,6 @@ export const Interaction = styled.div`
 
   display: flex;
   align-items: center;
-
-  &:hover {
-    &::after {
-      opacity: 1;
-    }
-  }
 
   &:after {
     content: '';
@@ -62,6 +67,8 @@ export const Interaction = styled.div`
 `;
 
 export const LeftInteraction = styled(Interaction)`
+  margin-left: -2px;
+
   &::after {
     left: 3px;
     border-top-left-radius: 2px;
@@ -70,6 +77,8 @@ export const LeftInteraction = styled(Interaction)`
 `;
 
 export const RightInteraction = styled(Interaction)`
+  margin-right: -2px;
+
   &::after {
     right: 3px;
     border-top-right-radius: 2px;

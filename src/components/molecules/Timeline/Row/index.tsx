@@ -1,37 +1,86 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-import { TimelineBar, TimelineDay } from '@components/atoms';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
-import { Container } from './styles';
+import { ITimelineRow } from '@interfaces/Timeline';
 
-const days = [
-  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-  23, 24, 25, 26, 27, 28, 29, 30, 31,
-];
+import { ColorPicker, Container, Item, Selector } from './styles';
 
-const Row: React.FC = () => {
-  const timelineRowRef = useRef<HTMLDivElement>(null);
-  const timelineDaysRef = useRef<HTMLDivElement[]>(null);
+interface IItemRowProps {
+  item: ITimelineRow;
+}
 
-  useEffect(() => {
-    if (timelineRowRef.current) {
-      const { width, x } = timelineRowRef.current.getBoundingClientRect();
+const ItemRow: React.FC<IItemRowProps> = ({ item }) => {
+  const parsedMonth = useMemo(() => {
+    return item.startDate
+      ? format(item.startDate, 'MMM', { locale: ptBR })
+      : '';
+  }, [item]);
 
-      console.log({ width }, width / 47, days.length / width, x);
-    }
-  }, []);
+  const parsedYear = useMemo(() => {
+    return item.startDate
+      ? format(item.startDate, 'yyyy', { locale: ptBR })
+      : '';
+  }, [item]);
+
+  const parsedStartDate = useMemo(() => {
+    return item.startDate
+      ? format(item.startDate, 'dd MMM yyyy', { locale: ptBR })
+      : '';
+  }, [item]);
+
+  const parsedEndDate = useMemo(() => {
+    return item.endDate
+      ? format(item.endDate, 'dd MMM yyyy', { locale: ptBR })
+      : '';
+  }, [item]);
 
   return (
-    <Container ref={timelineRowRef} className="timeline-row">
-      {days.map(day => {
-        return <TimelineDay key={day} date={new Date(2021, 9, day)} />;
-      })}
+    <Container>
+      {item.type === 'header' && (
+        <Item type="header">
+          <div>
+            <strong>{item.name}</strong>
 
-      <TimelineBar />
+            <Selector>
+              <FiChevronLeft size={24} color="#ffffff" />
 
-      <div />
+              <div>
+                <strong>{parsedMonth}</strong>
+                <strong>{parsedYear}</strong>
+              </div>
+
+              <FiChevronRight size={24} color="#ffffff" />
+            </Selector>
+          </div>
+        </Item>
+      )}
+
+      {item.type === 'project' && (
+        <Item type="project">
+          <div>
+            <strong>{item.name}</strong>
+
+            <span>
+              {parsedStartDate} - {parsedEndDate}
+            </span>
+          </div>
+        </Item>
+      )}
+
+      {item.type === 'user' && (
+        <Item key={item.id} type="user">
+          <div>
+            <strong>{item.name}</strong>
+
+            <ColorPicker color={item.color || ''} />
+          </div>
+        </Item>
+      )}
     </Container>
   );
 };
 
-export { Row as TimelineRow };
+export { ItemRow as TimelineItemRow };

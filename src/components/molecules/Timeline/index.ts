@@ -1,1 +1,2 @@
-export { TimelineRow } from './Row';
+export { TimelineCalendarRow } from './Calendar';
+export { TimelineItemRow } from './Row';

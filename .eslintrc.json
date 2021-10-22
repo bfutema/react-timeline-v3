@@ -49,7 +49,10 @@
     "react/jsx-one-expression-per-line": "off",
     "import/no-duplicates": "off",
     "no-plusplus": "off",
+    "react/no-unused-prop-types": "off",
     "import/no-extraneous-dependencies": "off",
+    "react/require-default-props": "off",
+    "class-methods-use-this": "off",
     "import-helpers/order-imports": [
       "warn",
       {
