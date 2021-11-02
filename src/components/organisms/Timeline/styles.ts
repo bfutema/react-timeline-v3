@@ -41,6 +41,8 @@ export const Users = styled.div`
 export const ViewportData = styled.div`
   width: 100%;
 
+  padding-left: 1px;
+
   overflow: scroll;
 
   display: flex;

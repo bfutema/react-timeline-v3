@@ -91,7 +91,7 @@ const Bar: React.FC<IBarProps> = ({
   // useDrag(dragRef, { onDrag: onDragBar, snap }, calendarRef);
   useResize(
     leftResizeRef,
-    { onResize: leftResize, onDown, onUp, snap },
+    { onResize: leftResize, onDown, onUp, snap, elementKey: keys.data },
     calendarRef,
   );
   useResize(
@@ -106,8 +106,6 @@ const Bar: React.FC<IBarProps> = ({
     targetRef: headerRef,
     directions: 'horizontal',
   });
-
-  // console.log(document.getElementById(keys.data || '')?.classList);
 
   useSyncronizedScroll({
     refs: [

@@ -1,0 +1,56 @@
+/* eslint-disable no-shadow */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable react/state-in-constructor */
+import React from 'react';
+
+import { FrappeGantt } from './Frappe';
+import { Task } from './Task';
+import { ViewMode } from './ViewMode';
+
+const tasks = [
+  {
+    id: 'Task 1',
+    name: 'Redesign website',
+    start: '2016-12-28',
+    end: '2016-12-31',
+    progress: 75,
+    dependencies: '',
+  },
+  {
+    id: 'Task 2',
+    name: 'Redesign website',
+    start: '2016-12-28',
+    end: '2016-12-31',
+    progress: 50,
+    dependencies: 'Task 1',
+  },
+  {
+    id: 'Task 3',
+    name: 'Redesign website',
+    start: '2016-12-28',
+    end: '2016-12-31',
+    progress: 25,
+    dependencies: 'Task 2, Task 1',
+  },
+] as Task[];
+
+class App extends React.Component<any, any> {
+  state = { mode: ViewMode.Day };
+
+  render() {
+    return (
+      <div>
+        <FrappeGantt
+          tasks={tasks}
+          viewMode={this.state.mode}
+          onClick={task => console.log(task)}
+          onDateChange={(task, start, end) => console.log(task, start, end)}
+          onProgressChange={(task, progress) => console.log(task, progress)}
+          onTasksChange={tasks => console.log(tasks)}
+        />
+      </div>
+    );
+  }
+}
+
+export { App as FrappeApp };
